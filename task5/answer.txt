@@ -1,0 +1,51 @@
+cp -r task4 task5
+cd task5
+mkdir proxy
+
+
+# proxy config
+
+server {
+    listen 80;
+
+    location / {
+        proxy_pass http://front-end:9000;
+    }
+
+    location /api {
+        proxy_pass http://back-end:5252;
+    }
+}
+
+
+
+
+# docker compose file
+
+version: '3'
+
+services:
+  back-end:
+    build:
+      context: ./back-end
+      dockerfile: Dockerfile
+    image: softy-pinko-back-end:task5
+
+  front-end:
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile
+    image: softy-pinko-front-end:task5
+    depends_on:
+      - back-end
+
+  proxy:
+    build:
+      context: ./proxy
+      dockerfile: Dockerfile
+    image: softy-pinko-proxy:task5
+    ports:
+      - "80:80"
+    depends_on:
+      - front-end
+      - back-end
